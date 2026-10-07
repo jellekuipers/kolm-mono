@@ -1,0 +1,39 @@
+{
+  "name": "kolm-mono",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vp run -r --parallel dev",
+    "ready": "vp run db#generate && vp check && vp run -r test && vp run -r build",
+    "test": "vp run -r test",
+    "build": "vp run -r build",
+    "e2e": "vp run e2e#e2e",
+    "e2e:install": "vp run e2e#install",
+    "env": "varlock load",
+    "db:up": "vp run db#up",
+    "db:down": "vp run db#down",
+    "db:migrate": "vp run db#migrate",
+    "db:deploy": "vp run db#deploy",
+    "db:seed": "vp run db#seed",
+    "db:studio": "vp run db#studio",
+    "prepare": "vp config",
+    "skills": "vpx skills experimental_install -y"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "varlock": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.9.1",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

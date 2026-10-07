@@ -1,0 +1,3 @@
+vp staged
+# Block commits that contain values of @sensitive env items in plaintext.
+varlock scan --staged

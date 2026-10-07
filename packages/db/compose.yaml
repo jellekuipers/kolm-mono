@@ -1,0 +1,23 @@
+# Local Postgres: `vp run db#up` / `vp run db#down`. Those run docker compose through
+# `varlock run`, so POSTGRES_PORT comes from the env schema (/.env.schema).
+name: kolm-mono
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    ports:
+      # Loopback only: the password is a public default.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      retries: 15
+
+volumes:
+  postgres:

@@ -1,0 +1,21 @@
+{
+  "name": "auth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "better-auth configuration on top of the db package. Optional: enabled by setting BETTER_AUTH_SECRET.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "better-auth": "catalog:",
+    "db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsconfig": "workspace:*",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

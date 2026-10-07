@@ -1,0 +1,26 @@
+{
+  "name": "db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Prisma schema and client (Postgres), plus a local Postgres via docker compose. Optional: enabled by setting DATABASE_URL.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "catalog:",
+    "@prisma/client": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "prisma": "catalog:",
+    "tsconfig": "workspace:*",
+    "typescript": "catalog:",
+    "varlock": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}
