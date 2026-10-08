@@ -45,8 +45,8 @@ const socketAddress = (c: Context) => {
 /**
  * Limits requests to `limit` per minute per client IP. The IP comes from `x-forwarded-for`, which the client's
  * `/api` proxy (and SSR) set from the real socket address; the API only listens on
- * loopback, so it can't be spoofed from outside. Health checks are exempt, so probes
- * never get throttled.
+ * loopback, so it can't be spoofed from outside. Only liveness is exempt: readiness pings the
+ * database, so an unlimited flood of it could exhaust the pool.
  */
 const limitRequests = (limit: number) =>
   rateLimiter<Env>({
@@ -55,7 +55,7 @@ const limitRequests = (limit: number) =>
     standardHeaders: "draft-7",
     keyGenerator: (c) =>
       c.req.header("x-forwarded-for")?.split(",")[0]?.trim() || socketAddress(c) || "direct",
-    skip: (c) => c.req.path.startsWith("/api/health/"),
+    skip: (c) => c.req.path === "/api/health/live",
     message: errorBody("rate_limited", "Too many requests, try again later"),
   });
 
@@ -180,8 +180,9 @@ export function createApp(deps: AppDeps = {}) {
       return c.json(await listNotes(requireNotes(), { query: q, limit }), 200);
     })
     .openapi(createNoteRoute, async (c) => {
-      if (!(await getSession(c))) throw new ApiError(401, "unauthorized", "Sign in to add notes");
-      const note = await requireNotes().insertNote(c.req.valid("json"));
+      const session = await getSession(c);
+      if (!session) throw new ApiError(401, "unauthorized", "Sign in to add notes");
+      const note = await requireNotes().insertNote(c.req.valid("json"), session.user.id);
       return c.json(note, 201);
     });
 

@@ -30,7 +30,11 @@ const notes = [
   },
 ];
 for (const note of notes) {
-  await db.note.upsert({ where: { id: note.id }, update: {}, create: note });
+  await db.note.upsert({
+    where: { id: note.id },
+    update: { authorId: demo.id },
+    create: { ...note, authorId: demo.id },
+  });
 }
 
 await db.$disconnect();

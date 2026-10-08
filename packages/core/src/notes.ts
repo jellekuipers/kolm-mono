@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // The worked example resource: see "Worked example: notes" in AGENTS.md. Notes are
-// public demo data, so nothing here is sensitive or tied to a user.
+// public demo data. Each stores its author's user ID, which the API doesn't return.
 
 export const Note = z
   .object({
@@ -38,8 +38,8 @@ export type ListNotesInput = z.infer<typeof ListNotesInput>;
 export interface NotesDeps {
   /** At most `limit` notes, newest first, matching `query` when given. */
   findNotes: (args: { query?: string; limit: number }) => Promise<Note[]>;
-  /** Stores a note and returns it. The input must already be validated with `CreateNoteInput`. */
-  insertNote: (input: CreateNoteInput) => Promise<Note>;
+  /** Stores a note by `authorId` (a user ID) and returns it. The input must already be validated with `CreateNoteInput`. */
+  insertNote: (input: CreateNoteInput, authorId: string) => Promise<Note>;
 }
 
 /** Lists notes, newest first. */

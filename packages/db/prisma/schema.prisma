@@ -26,6 +26,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  notes         Note[]
 
   @@map("user")
 }
@@ -78,14 +79,19 @@ model Verification {
 }
 
 // The worked example resource (see AGENTS.md, "Worked example: notes"). Public demo
-// data with no owner. Delete this model and add a migration that drops the table.
+// data; the author is stored so a user's notes can be traced and removed (deleting the
+// user deletes them). Delete this model and add a migration that drops the table.
 
 model Note {
   id        String   @id @default(cuid())
   title     String
   body      String
   createdAt DateTime @default(now())
+  // Optional only for notes created before authors were stored.
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
+  @@index([authorId])
   @@map("note")
 }

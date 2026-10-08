@@ -85,8 +85,11 @@ test("POST /api/notes creates a note", async () => {
     body: JSON.stringify({ title: "  New ", body: "Text" }),
   });
   expect(res.status).toBe(201);
-  expect(await res.json()).toMatchObject({ title: "New", body: "Text" });
-  expect(create).toHaveBeenCalledWith({ data: { title: "New", body: "Text" } });
+  const body = await res.json();
+  expect(body).toMatchObject({ title: "New", body: "Text" });
+  // The author is stored, but its user ID isn't returned.
+  expect(create).toHaveBeenCalledWith({ data: { title: "New", body: "Text", authorId: "u1" } });
+  expect(body).not.toHaveProperty("authorId");
 });
 
 test("POST /api/notes rejects an empty title with 400", async () => {
@@ -157,7 +160,7 @@ test("responses carry security headers", async () => {
   expect(res.headers.get("x-frame-options")).toBe("SAMEORIGIN");
 });
 
-test("requests are rate limited per client IP, health checks excepted", async () => {
+test("requests are rate limited per client IP, liveness excepted", async () => {
   const app = createApp({ rateLimit: 2 });
   const get = (path: string, ip: string) =>
     app.request(path, { headers: { "x-forwarded-for": ip } });
@@ -169,9 +172,10 @@ test("requests are rate limited per client IP, health checks excepted", async ()
   expect(await limited.json()).toEqual({
     error: { code: "rate_limited", message: "Too many requests, try again later" },
   });
-  // Other clients and health checks are unaffected.
+  // Other clients and liveness are unaffected; readiness (it pings the database) is limited.
   expect((await get("/api/me", "203.0.113.2")).status).toBe(401);
   expect((await get("/api/health/live", "203.0.113.1")).status).toBe(200);
+  expect((await get("/api/health/ready", "203.0.113.1")).status).toBe(429);
 });
 
 test("every response carries a request ID", async () => {

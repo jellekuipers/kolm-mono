@@ -1,7 +1,7 @@
 import type { Auth } from "auth";
 import type { HealthDeps } from "core/health";
 import type { NotesDeps } from "core/notes";
-import type { Db } from "db";
+import type { Db, Note } from "db";
 
 /** The app's optional services and settings. Each feature that needs a service is off until it's provided. */
 export interface AppDeps {
@@ -22,10 +22,12 @@ export const healthDeps = ({ db, auth }: AppDeps): HealthDeps => ({
 /** Shown when a notes endpoint or tool is used without a database. */
 export const NOTES_DISABLED = "Notes need a database (set DATABASE_URL)";
 
-/** Maps a stored note to the `Note` shape (dates as ISO strings). */
-const toNote = (row: { id: string; title: string; body: string; createdAt: Date }) => ({
-  ...row,
-  createdAt: row.createdAt.toISOString(),
+/** Maps a stored note to the `Note` shape (dates as ISO strings). Picks fields, so `authorId` stays private. */
+const toNote = ({ id, title, body, createdAt }: Note) => ({
+  id,
+  title,
+  body,
+  createdAt: createdAt.toISOString(),
 });
 
 /** What the notes functions need, backed by the database. `undefined` when there's no database. */
@@ -47,5 +49,6 @@ export const notesDeps = ({ db }: AppDeps): NotesDeps | undefined =>
       });
       return rows.map(toNote);
     },
-    insertNote: async (data) => toNote(await db.note.create({ data })),
+    insertNote: async (input, authorId) =>
+      toNote(await db.note.create({ data: { ...input, authorId } })),
   };

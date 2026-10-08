@@ -157,7 +157,10 @@ function Notes() {
                 <Card.Title>{note.title}</Card.Title>
                 <Text whiteSpace="pre-wrap">{note.body}</Text>
                 <Text color="fg.muted" textStyle="xs">
-                  {note.createdAt.slice(0, 10)}
+                  {/* The server renders its own time zone; the browser corrects it to the user's. */}
+                  <time dateTime={note.createdAt} suppressHydrationWarning>
+                    {new Date(note.createdAt).toLocaleDateString()}
+                  </time>
                 </Text>
               </Card.Body>
             </Card.Root>
